@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sweet Escapes Interactive Menu</title>
+<style>
+/* Configuración de Pantalla y UX Móvil */
+body, html {
+margin: 0; padding: 0; width: 100%; height: 100%;
+overflow: hidden; display: flex; justify-content: center;
+align-items: center; background-color: #fcfaf8;
+touch-action: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+position: relative;
+display: inline-block;
+max-width: 100%;
+max-height: 100vh;
+box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* REQUISITO: Imagen original intacta sin modificaciones */
+#menu-image {
+display: block;
+max-width: 100%;
+max-height: 100vh;
+user-select: none;
+-webkit-user-drag: none;
+}
+
+/* CAPA DE ANIMACIÓN (Fuegos artificiales) */
+#canvas-overlay {
+position: absolute;
+top: 0; left: 0;
+width: 100%; height: 100%;
+pointer-events: none;
+z-index: 10;
+}
+
+/* BOTÓN DE LLAMADA: Elegante y profesional */
+.call-btn {
+position: absolute;
+bottom: 25px;
+left: 50%;
+transform: translateX(-50%);
+background: #3d261d; /* Color café oscuro de Sweet Escapes */
+color: #ffffff;
+padding: 14px 28px;
+border-radius: 50px;
+text-decoration: none;
+font-weight: bold;
+font-size: 18px;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+z-index: 20;
+display: flex;
+align-items: center;
+gap: 12px;
+border: 1px solid rgba(255,255,255,0.2);
+transition: transform 0.2s ease, background 0.2s ease;
+white-space: nowrap;
+}
+
+.call-btn:active {
+transform: translateX(-50%) scale(0.92);
+background: #2a1a14;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="interaction-root">
+<img src="https://i.ibb.co/ZR0X9dyD/3-C8-F4-E5-F-57-A7-46-B5-8168-EE328-AD67-F8-E.png" id="menu-image" alt="Sweet Escapes Menu">
+
+<canvas id="canvas-overlay"></canvas>
+
+<a href="tel:+13132997999" class="call-btn">
+<span>📞</span> +1 (313) 299-7999
+</a>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas-overlay');
+const ctx = canvas.getContext('2d');
+const root = document.getElementById('interaction-root');
+let particles = [];
+
+function resize() {
+canvas.width = root.clientWidth;
+canvas.height = root.clientHeight;
+}
+
+class Particle {
+constructor(x, y) {
+this.x = x;
+this.y = y;
+this.size = Math.random() * 3 + 1;
+this.speedX = (Math.random() - 0.5) * 8;
+this.speedY = (Math.random() - 0.5) * 8;
+// Colores cálidos y dorados para combinar con los postres
+this.color = `hsl(${Math.random() * 40 + 20}, 70%, 60%)`;
+this.opacity = 1;
+}
+update() {
+this.x += this.speedX;
+this.y += this.speedY;
+this.opacity -= 0.025;
+}
+draw() {
+ctx.globalAlpha = this.opacity;
+ctx.fillStyle = this.color;
+ctx.beginPath();
+ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+ctx.fill();
+}
+}
+
+function createFx(e) {
+const rect = canvas.getBoundingClientRect();
+const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+const x = clientX - rect.left;
+const y = clientY - rect.top;
+
+for (let i = 0; i < 15; i++) {
+particles.push(new Particle(x, y));
+}
+}
+
+function animate() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+particles = particles.filter(p => p.opacity > 0);
+particles.forEach(p => {
+p.update();
+p.draw();
+});
+requestAnimationFrame(animate);
+}
+
+root.addEventListener('mousedown', createFx);
+root.addEventListener('touchstart', (e) => {
+createFx(e);
+}, {passive: false});
+
+window.addEventListener('load', () => {
+resize();
+animate();
+});
+window.addEventListener('resize', resize);
+</script>
+</body>
+</html>
